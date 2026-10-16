@@ -37,7 +37,7 @@ func (e ErrorWriter) Write(w http.ResponseWriter, r *http.Request, err error) {
 	case errors.Is(err, usecase.ErrReservationUnavailable):
 		WriteError(w, http.StatusServiceUnavailable, "Reservation Service unavailable")
 	case errors.Is(err, usecase.ErrRatingUnavailable):
-		WriteError(w, http.StatusServiceUnavailable, "Bonus Service unavailable")
+		WriteError(w, http.StatusServiceUnavailable, "Service unavailable")
 	case errors.Is(err, usecase.ErrServiceUnavailable):
 		WriteError(w, http.StatusServiceUnavailable, "Service unavailable")
 	default:
