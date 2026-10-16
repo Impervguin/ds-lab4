@@ -46,7 +46,7 @@ func NewReservationUseCase(
 func (uc *ReservationUseCase) ListReservations(ctx context.Context, username string) ([]domain.ReservationDetails, error) {
 	reservations, err := uc.reservations.ListReservations(ctx, username, "")
 	if err != nil {
-		return nil, err
+		return nil, unavailable(err, ErrReservationUnavailable)
 	}
 
 	catalogue := uc.newCatalogue()
@@ -69,12 +69,12 @@ func (uc *ReservationUseCase) TakeBook(
 ) (*domain.TakenBook, error) {
 	rented, err := uc.reservations.CountReservations(ctx, username, domain.StatusRented)
 	if err != nil {
-		return nil, err
+		return nil, unavailable(err, ErrReservationUnavailable)
 	}
 
 	rating, err := uc.ratings.GetRating(ctx, username)
 	if err != nil {
-		return nil, err
+		return nil, unavailable(err, ErrRatingUnavailable)
 	}
 
 	if rented >= rating.MaxBooks {
@@ -88,7 +88,7 @@ func (uc *ReservationUseCase) TakeBook(
 
 	taken, err := uc.libraries.TakeBook(ctx, command.LibraryUID, command.BookUID, false)
 	if err != nil {
-		return nil, err
+		return nil, unavailable(err, ErrLibraryUnavailable)
 	}
 
 	reservation, err := uc.reservations.CreateReservation(ctx, username, domain.NewReservation{
@@ -99,7 +99,7 @@ func (uc *ReservationUseCase) TakeBook(
 	}, false)
 	if err != nil {
 		uc.giveCopyBack(ctx, command.LibraryUID, command.BookUID, taken.Condition)
-		return nil, err
+		return nil, unavailable(err, ErrReservationUnavailable)
 	}
 
 	described, err := uc.newCatalogue().describe(ctx, *reservation)
@@ -113,7 +113,7 @@ func (uc *ReservationUseCase) TakeBook(
 func (uc *ReservationUseCase) ReturnBook(ctx context.Context, username string, command ReturnBookCommand) error {
 	reservation, err := uc.reservations.ReturnReservation(ctx, username, command.ReservationUID, command.Date, false)
 	if err != nil {
-		return err
+		return unavailable(err, ErrReservationUnavailable)
 	}
 
 	log := uc.log.With(
@@ -126,7 +126,7 @@ func (uc *ReservationUseCase) ReturnBook(ctx context.Context, username string, c
 	case errors.Is(err, ErrQueued):
 		log.WarnContext(ctx, "library is unavailable, returning the copy later")
 	case err != nil:
-		return err
+		return unavailable(err, ErrLibraryUnavailable)
 	}
 
 	change, err := uc.ratings.CloseReservation(ctx, username, domain.ClosedReservation{
@@ -142,7 +142,7 @@ func (uc *ReservationUseCase) ReturnBook(ctx context.Context, username string, c
 		)
 		return nil
 	case err != nil:
-		return err
+		return unavailable(err, ErrRatingUnavailable)
 	}
 
 	log.InfoContext(ctx, "reservation closed",

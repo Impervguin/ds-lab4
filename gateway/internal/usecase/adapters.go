@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 
@@ -31,4 +32,19 @@ type RatingService interface {
 }
 
 var ErrServiceUnavailable = errors.New("service unavailable")
+
+var (
+	ErrLibraryUnavailable     = fmt.Errorf("library %w", ErrServiceUnavailable)
+	ErrReservationUnavailable = fmt.Errorf("reservation %w", ErrServiceUnavailable)
+	ErrRatingUnavailable      = fmt.Errorf("rating %w", ErrServiceUnavailable)
+)
 var ErrQueued = errors.New("queued")
+
+// unavailable tags an ErrServiceUnavailable the use case could not handle
+// with the upstream it came from; any other error is returned untouched.
+func unavailable(err, service error) error {
+	if errors.Is(err, ErrServiceUnavailable) {
+		return fmt.Errorf("%w: %w", service, err)
+	}
+	return err
+}

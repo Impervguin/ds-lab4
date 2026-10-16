@@ -32,6 +32,12 @@ func (e ErrorWriter) Write(w http.ResponseWriter, r *http.Request, err error) {
 		WriteError(w, http.StatusConflict, "Reservation is already closed")
 	case errors.Is(err, domain.ErrBookLimitReached):
 		WriteValidationError(w, "The number of books taken has reached the limit", nil)
+	case errors.Is(err, usecase.ErrLibraryUnavailable):
+		WriteError(w, http.StatusServiceUnavailable, "Library Service unavailable")
+	case errors.Is(err, usecase.ErrReservationUnavailable):
+		WriteError(w, http.StatusServiceUnavailable, "Reservation Service unavailable")
+	case errors.Is(err, usecase.ErrRatingUnavailable):
+		WriteError(w, http.StatusServiceUnavailable, "Bonus Service unavailable")
 	case errors.Is(err, usecase.ErrServiceUnavailable):
 		WriteError(w, http.StatusServiceUnavailable, "Service unavailable")
 	default:

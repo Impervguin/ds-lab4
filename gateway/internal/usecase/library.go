@@ -17,7 +17,11 @@ func NewLibraryUseCase(libraries LibraryService) *LibraryUseCase {
 }
 
 func (uc *LibraryUseCase) ListLibraries(ctx context.Context, city string, page, size int) (Page[domain.Library], error) {
-	return uc.libraries.ListLibraries(ctx, city, page, size)
+	libraries, err := uc.libraries.ListLibraries(ctx, city, page, size)
+	if err != nil {
+		return Page[domain.Library]{}, unavailable(err, ErrLibraryUnavailable)
+	}
+	return libraries, nil
 }
 
 func (uc *LibraryUseCase) ListBooks(
@@ -26,5 +30,9 @@ func (uc *LibraryUseCase) ListBooks(
 	page, size int,
 	showAll bool,
 ) (Page[domain.LibraryBook], error) {
-	return uc.libraries.ListBooks(ctx, libraryUID, page, size, showAll)
+	books, err := uc.libraries.ListBooks(ctx, libraryUID, page, size, showAll)
+	if err != nil {
+		return Page[domain.LibraryBook]{}, unavailable(err, ErrLibraryUnavailable)
+	}
+	return books, nil
 }
