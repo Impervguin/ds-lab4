@@ -7,6 +7,18 @@ on:
     branches:
       - master
 jobs:
+  gateway-tests:
+    uses: ./.github/workflows/test-gateway.yml
+
+  library-tests:
+    uses: ./.github/workflows/test-library.yml
+
+  rating-tests:
+    uses: ./.github/workflows/test-rating.yml
+
+  reservation-tests:
+    uses: ./.github/workflows/test-reservation.yml
+  
   build:
     name: Autograding
     runs-on: ubuntu-latest
