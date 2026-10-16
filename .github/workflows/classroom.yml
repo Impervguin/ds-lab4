@@ -56,10 +56,10 @@ jobs:
       # запускает тесты с урезанным окружением, и путь передаётся явно.
       - name: Configure kubectl
         env:
-          KUBECONFIG_B64: ${{ secrets.KUBECONFIG }}
+          KUBECONFIG_RAW: ${{ secrets.KUBECONFIG }}
         run: |
           mkdir -p .kube
-          echo "$KUBECONFIG" > .kube/config
+          echo "$KUBECONFIG_RAW" > .kube/config
           chmod 600 .kube/config
           echo "KUBECONFIG=$PWD/.kube/config" >> "$GITHUB_ENV"
 
