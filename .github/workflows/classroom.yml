@@ -80,3 +80,8 @@ jobs:
       - name: Autograding
         uses: education/autograding@v1
         continue-on-error: true
+
+      - name: Cleanup k8s
+        if: always() && env.KUBECONFIG != ''
+        run: |
+          helm list -n test -q | xargs -r -n1 helm uninstall -n test --wait --timeout 3m
