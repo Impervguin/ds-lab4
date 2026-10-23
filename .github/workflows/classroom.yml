@@ -77,6 +77,13 @@ jobs:
       - name: Wait before services are ready
         run: kubectl rollout status deployment gateway -n test --timeout 3m
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+
+      - name: Install newman
+        run: npm install -g newman
+
       - name: Autograding
         uses: education/autograding@v1
         continue-on-error: true
